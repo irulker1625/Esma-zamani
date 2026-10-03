@@ -1,0 +1,38 @@
+name: Split Minik Kesif APK for download
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/split-minik-kesif-apk.yml'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  split-apk:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        part: ['00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15']
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: minik-kesif-debug-apk
+          run-id: 37152915548
+          github-token: ${{ github.token }}
+          path: downloaded
+      - name: Extract selected 8 MB part
+        run: |
+          mkdir pieces
+          APK="$(find downloaded -name app-debug.apk -print -quit)"
+          test -n "$APK"
+          split -b 8m -d -a 2 --additional-suffix=.bin "$APK" pieces/apk-part-
+      - name: Upload APK part
+        uses: actions/upload-artifact@v4
+        with:
+          name: minik-kesif-part-${{ matrix.part }}
+          path: pieces/apk-part-${{ matrix.part }}.bin
+          if-no-files-found: ignore
+          retention-days: 7
