@@ -1,0 +1,46 @@
+name: Build Minik Kesif APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-minik-kesif-apk.yml'
+      - 'Minik-Kesif/minik-kesif-source.b64'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Decode source
+        run: |
+          base64 -d Minik-Kesif/minik-kesif-source.b64 > source.zip
+          mkdir app
+          unzip -q source.zip -d app
+      - name: Install dependencies
+        working-directory: app/minik-kesif
+        run: npm install --no-audit --no-fund
+      - name: Prepare Android project
+        working-directory: app/minik-kesif
+        run: npx expo prebuild --platform android --clean
+      - name: Use runner Android SDK
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          test -d /usr/local/lib/android/sdk/platform-tools
+      - name: Build installable debug APK
+        working-directory: app/minik-kesif/android
+        run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: minik-kesif-debug-apk
+          path: app/minik-kesif/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
