@@ -1,8 +1,6 @@
-name: Build Zikir Vakti ARM64 APK
+name: Build Zikir Vakti APK
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -53,14 +51,13 @@ jobs:
           marker = "react {"
           if marker not in content:
               raise SystemExit("React Native Gradle configuration was not found")
-          content = content.replace(marker, marker + "\n    // Embed the JavaScript bundle so the APK runs without Metro.\n    debuggableVariants = []", 1)
-          default = "defaultConfig {"
-          if default not in content:
-              raise SystemExit("Android defaultConfig was not found")
-          content = content.replace(default, default + "\n        ndk { abiFilters \"arm64-v8a\" }", 1)
+          react_block = '''react {
+              // Embed the JavaScript bundle so the APK runs without Metro.
+              debuggableVariants = []'''
+          content = content.replace(marker, react_block, 1)
           gradle.write_text(content)
           PY
-      - name: Build ARM64 APK and verify bundled JavaScript
+      - name: Build APK and verify bundled JavaScript
         working-directory: app-project/android
         run: |
           chmod +x gradlew
@@ -69,15 +66,10 @@ jobs:
           unzip -l "$APK" | grep -q 'assets/index.android.bundle'
           unzip -p "$APK" assets/index.android.bundle > "$RUNNER_TEMP/index.android.bundle"
           test -s "$RUNNER_TEMP/index.android.bundle"
-          unzip -l "$APK" | grep -q 'lib/arm64-v8a/libhermes.so'
-          if unzip -l "$APK" | grep -q 'lib/armeabi-v7a/libhermes.so'; then
-            echo "Unexpected 32-bit libraries found in the ARM64 APK"
-            exit 1
-          fi
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: zikir-vakti-arm64-offline-apk
+          name: zikir-vakti-android-apk
           path: app-project/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 90
           if-no-files-found: error
