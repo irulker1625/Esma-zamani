@@ -1,0 +1,46 @@
+name: Build Zikir Vakti APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Extract project source
+        run: |
+          base64 --decode zikir-vakti-source.b64 > zikir-vakti-project.zip
+          mkdir app-project
+          unzip -q zikir-vakti-project.zip -d app-project
+          test -f app-project/package.json
+      - name: Install JavaScript packages
+        working-directory: app-project
+        run: npm ci --no-audit --no-fund
+      - name: Generate Android project
+        working-directory: app-project
+        run: npx expo prebuild --platform android
+      - name: Build debug APK
+        working-directory: app-project/android
+        run: chmod +x gradlew && ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zikir-vakti-android-apk
+          path: app-project/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 90
+          if-no-files-found: error
