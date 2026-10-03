@@ -34,12 +34,26 @@ jobs:
       - name: Install JavaScript packages
         working-directory: app-project
         run: npm ci --no-audit --no-fund
-      - name: Generate Android project
+      - name: Generate Android project with offline bundle setting
         working-directory: app-project
-        run: npx expo prebuild --platform android
-      - name: Build debug APK
+        run: |
+          npx expo prebuild --platform android
+          python3 - <<'PY'
+          from pathlib import Path
+          gradle = Path("android/app/build.gradle")
+          content = gradle.read_text()
+          marker = "react {"
+          if marker not in content:
+              raise SystemExit("React Native Gradle configuration was not found")
+          content = content.replace(marker, marker + "\n    // Embed the JavaScript bundle so the APK runs without Metro.\n    debuggableVariants = []", 1)
+          gradle.write_text(content)
+          PY
+      - name: Build debug APK and verify bundled JavaScript
         working-directory: app-project/android
-        run: chmod +x gradlew && ./gradlew assembleDebug
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q 'assets/index.android.bundle'
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
