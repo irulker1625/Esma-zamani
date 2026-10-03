@@ -1,0 +1,52 @@
+name: Split existing APK artifact
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  split-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download successful APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zikir-vakti-android-apk
+          run-id: 37133065378
+          github-token: ${{ github.token }}
+          path: downloaded
+      - name: Split APK into 8 MB pieces
+        run: |
+          mkdir pieces
+          split -b 8m -d --additional-suffix=.bin downloaded/app-debug.apk pieces/apk-part-
+          ls -lh pieces
+      - name: Upload piece 00
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-part-00
+          path: pieces/apk-part-00.bin
+      - name: Upload piece 01
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-part-01
+          path: pieces/apk-part-01.bin
+      - name: Upload piece 02
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-part-02
+          path: pieces/apk-part-02.bin
+      - name: Upload piece 03
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-part-03
+          path: pieces/apk-part-03.bin
+      - name: Upload piece 04
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-part-04
+          path: pieces/apk-part-04.bin
+      - name: Upload piece 05
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-part-05
+          path: pieces/apk-part-05.bin
