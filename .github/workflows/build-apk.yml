@@ -8,6 +8,9 @@ permissions:
 jobs:
   android-apk:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -20,8 +23,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Check preinstalled Android SDK
+        run: test -d "$ANDROID_HOME" && ls "$ANDROID_HOME/platforms"
       - name: Extract project source
         run: |
           base64 --decode zikir-vakti-source.b64 > zikir-vakti-project.zip
