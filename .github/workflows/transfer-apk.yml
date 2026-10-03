@@ -12,7 +12,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: zikir-vakti-android-apk
-          run-id: 37133065378
+          run-id: 37144354890
           github-token: ${{ github.token }}
           path: downloaded
       - name: Split APK into 8 MB pieces
