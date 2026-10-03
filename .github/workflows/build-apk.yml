@@ -1,4 +1,4 @@
-name: Build Zikir Vakti APK
+name: Build Zikir Vakti ARM64 APK
 on:
   workflow_dispatch:
   push:
@@ -37,6 +37,14 @@ jobs:
       - name: Generate Android project with offline bundle setting
         working-directory: app-project
         run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path("app.json")
+          config = json.loads(path.read_text())
+          config["expo"]["android"]["versionCode"] = 4
+          path.write_text(json.dumps(config, indent=2) + "\n")
+          PY
           npx expo prebuild --platform android
           python3 - <<'PY'
           from pathlib import Path
@@ -46,18 +54,30 @@ jobs:
           if marker not in content:
               raise SystemExit("React Native Gradle configuration was not found")
           content = content.replace(marker, marker + "\n    // Embed the JavaScript bundle so the APK runs without Metro.\n    debuggableVariants = []", 1)
+          default = "defaultConfig {"
+          if default not in content:
+              raise SystemExit("Android defaultConfig was not found")
+          content = content.replace(default, default + "\n        ndk { abiFilters \"arm64-v8a\" }", 1)
           gradle.write_text(content)
           PY
-      - name: Build debug APK and verify bundled JavaScript
+      - name: Build ARM64 APK and verify bundled JavaScript
         working-directory: app-project/android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
-          unzip -l app/build/outputs/apk/debug/app-debug.apk | grep -q 'assets/index.android.bundle'
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          unzip -l "$APK" | grep -q 'assets/index.android.bundle'
+          unzip -p "$APK" assets/index.android.bundle > "$RUNNER_TEMP/index.android.bundle"
+          test -s "$RUNNER_TEMP/index.android.bundle"
+          unzip -l "$APK" | grep -q 'lib/arm64-v8a/libhermes.so'
+          if unzip -l "$APK" | grep -q 'lib/armeabi-v7a/libhermes.so'; then
+            echo "Unexpected 32-bit libraries found in the ARM64 APK"
+            exit 1
+          fi
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: zikir-vakti-android-apk
+          name: zikir-vakti-arm64-offline-apk
           path: app-project/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 90
           if-no-files-found: error
