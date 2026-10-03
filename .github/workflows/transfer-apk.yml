@@ -1,0 +1,102 @@
+name: Transfer full APK in pieces
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  split-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download successful APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zikir-vakti-android-apk
+          run-id: 37133065378
+          github-token: ${{ github.token }}
+          path: downloaded
+      - name: Split APK into 8 MB pieces
+        run: |
+          mkdir pieces
+          split -b 8m -d --additional-suffix=.bin downloaded/app-debug.apk pieces/apk-part-
+          ls -lh pieces
+      - name: Upload piece 00
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-00
+          path: pieces/apk-part-00.bin
+      - name: Upload piece 01
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-01
+          path: pieces/apk-part-01.bin
+      - name: Upload piece 02
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-02
+          path: pieces/apk-part-02.bin
+      - name: Upload piece 03
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-03
+          path: pieces/apk-part-03.bin
+      - name: Upload piece 04
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-04
+          path: pieces/apk-part-04.bin
+      - name: Upload piece 05
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-05
+          path: pieces/apk-part-05.bin
+      - name: Upload piece 06
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-06
+          path: pieces/apk-part-06.bin
+      - name: Upload piece 07
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-07
+          path: pieces/apk-part-07.bin
+      - name: Upload piece 08
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-08
+          path: pieces/apk-part-08.bin
+      - name: Upload piece 09
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-09
+          path: pieces/apk-part-09.bin
+      - name: Upload piece 10
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-10
+          path: pieces/apk-part-10.bin
+      - name: Upload piece 11
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-11
+          path: pieces/apk-part-11.bin
+      - name: Upload piece 12
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-12
+          path: pieces/apk-part-12.bin
+      - name: Upload piece 13
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-13
+          path: pieces/apk-part-13.bin
+      - name: Upload piece 14
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-14
+          path: pieces/apk-part-14.bin
+      - name: Upload piece 15
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-piece-15
+          path: pieces/apk-part-15.bin
