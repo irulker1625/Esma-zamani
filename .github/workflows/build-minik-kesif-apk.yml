@@ -46,6 +46,33 @@ jobs:
           unzip -t "$APK" >/dev/null
           unzip -l "$APK" | grep -q 'assets/index.android.bundle'
           ls -lh "$APK"
+      - name: Test APK startup on Android 10
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            APK=app/minik-kesif/android/app/build/outputs/apk/release/app-release.apk
+            adb install "$APK"
+            adb logcat -c
+            adb shell monkey -p com.minikkesif.oyunlar 1
+            sleep 10
+            adb logcat -d -v time > "$RUNNER_TEMP/minik-kesif-logcat.txt"
+            if adb shell pidof com.minikkesif.oyunlar; then
+              echo "App process still running"
+            else
+              echo "App process exited after launch"
+            fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minik-kesif-android10-launch-logcat
+          path: ${{ runner.temp }}/minik-kesif-logcat.txt
+          if-no-files-found: warn
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         with:
           name: minik-kesif-standalone-release-apk
