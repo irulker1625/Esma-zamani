@@ -1,0 +1,45 @@
+name: Diagnose Minik Kesif Android 10 launch
+on:
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  test-launch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built APK from run 5
+        uses: actions/download-artifact@v4
+        with:
+          name: minik-kesif-standalone-release-apk
+          run-id: 37191133965
+          repository: irulker1625/Esma-zamani
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: apk
+      - name: Test APK startup on Android 10
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: |
+            ls -lh apk/app-release.apk
+            timeout 180s adb -s emulator-5554 install apk/app-release.apk > "$RUNNER_TEMP/minik-kesif-install.txt" 2>&1 || true
+            adb -s emulator-5554 logcat -c || true
+            adb -s emulator-5554 shell monkey -p com.minikkesif.oyunlar 1 > "$RUNNER_TEMP/minik-kesif-launch.txt" 2>&1 || true
+            sleep 10
+            adb -s emulator-5554 logcat -d -v time > "$RUNNER_TEMP/minik-kesif-logcat.txt" || true
+            adb -s emulator-5554 shell pidof com.minikkesif.oyunlar > "$RUNNER_TEMP/minik-kesif-app-pid.txt" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minik-kesif-android10-diagnostic-logs
+          path: |
+            ${{ runner.temp }}/minik-kesif-install.txt
+            ${{ runner.temp }}/minik-kesif-launch.txt
+            ${{ runner.temp }}/minik-kesif-logcat.txt
+            ${{ runner.temp }}/minik-kesif-app-pid.txt
+          if-no-files-found: warn
+          retention-days: 7
