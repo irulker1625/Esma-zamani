@@ -55,25 +55,23 @@ jobs:
           profile: pixel_2
           disable-animations: true
           script: |
-            APK=app/minik-kesif/android/app/build/outputs/apk/release/app-release.apk
-            adb install "$APK"
+            adb install app/minik-kesif/android/app/build/outputs/apk/release/app-release.apk
             adb logcat -c
             adb shell monkey -p com.minikkesif.oyunlar 1
             sleep 10
             adb logcat -d -v time > "$RUNNER_TEMP/minik-kesif-logcat.txt"
-            if adb shell pidof com.minikkesif.oyunlar; then
-              echo "App process still running"
-            else
-              echo "App process exited after launch"
-            fi
+            adb shell pidof com.minikkesif.oyunlar > "$RUNNER_TEMP/minik-kesif-app-pid.txt" || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: minik-kesif-android10-launch-logcat
-          path: ${{ runner.temp }}/minik-kesif-logcat.txt
+          path: |
+            ${{ runner.temp }}/minik-kesif-logcat.txt
+            ${{ runner.temp }}/minik-kesif-app-pid.txt
           if-no-files-found: warn
           retention-days: 7
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: minik-kesif-standalone-release-apk
           path: app/minik-kesif/android/app/build/outputs/apk/release/app-release.apk
