@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap">
+<title>Flip Sayaç</title>
+<style>
+:root{--bg1:#f4f3f2;--bg2:#cfcdca;--num:#f3f3f1;--d:.14s;--btn:#1c1c1c;--btnt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;overflow:hidden;touch-action:none}
+body{background:#fff;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px}
+.pair{position:relative;display:flex;gap:var(--g,12px);--w:min(27vw,200px)}
+.pair.small{--w:min(8vw,36px);--g:1px;--r:7px}
+.pair.small .knob{display:none}
+.totalrow{display:flex;align-items:center;gap:10px;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 22px)}
+#reset{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;z-index:20;font-size:14px;padding:9px 16px;opacity:.85}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:30}
+.ov.show{display:flex}
+.dlg{background:#fff;border-radius:20px;padding:22px;width:min(80vw,300px);text-align:center;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.dlg p{margin:0 0 18px;font-size:17px;font-weight:700;color:#222}
+.dlg .bt{display:flex;gap:10px}
+.dlg button{flex:1;padding:12px 0;font-size:16px;box-shadow:none}
+#ok{background:#c8142b;color:#fff}
+#no{background:#e9e8e6;color:#222}
+.lbl{font-size:15px;font-weight:700;color:#444;letter-spacing:.5px}
+.pair.small::after{bottom:-9px;height:9px}
+.pair::after{content:"";position:absolute;left:4%;right:4%;bottom:-26px;height:26px;background:radial-gradient(ellipse at center,rgba(0,0,0,.45),rgba(0,0,0,0) 70%);filter:blur(5px);z-index:-1}
+.card{position:relative;width:var(--w);aspect-ratio:270/430;perspective:1000px}
+.half{position:absolute;left:0;right:0;height:50%;overflow:hidden;backface-visibility:hidden}
+.top{top:0;border-radius:var(--r,22px) var(--r,22px) 0 0;transform-origin:bottom;background:linear-gradient(#2b2b2b,#1b1b1b);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.12),inset 0 -14px 16px -10px rgba(0,0,0,.7)}
+.bot{bottom:0;border-radius:0 0 var(--r,22px) var(--r,22px);transform-origin:top;background:linear-gradient(#141414,#222);box-shadow:inset 0 14px 16px -10px rgba(0,0,0,.65),inset 0 -2px 0 rgba(255,255,255,.07)}
+.half::after{content:"";position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.num{position:absolute;left:0;right:0;height:200%;display:flex;align-items:center;justify-content:center;color:var(--num);font-weight:700;font-size:calc(var(--w)*.8);line-height:1;text-shadow:0 3px 5px rgba(0,0,0,.55)}
+.top .num{top:0}.bot .num{bottom:0}
+.flap{display:none}
+.go .flap{display:block}
+.go .f-top{animation:ft var(--d) ease-in forwards}
+.go .f-bot{transform:rotateX(90deg);animation:fb var(--d) var(--d) ease-out forwards}
+.go .f-top::after{animation:sh1 var(--d) ease-in forwards}
+.go .f-bot::after{opacity:.6;animation:sh2 var(--d) var(--d) ease-out forwards}
+.go .s-bot::after{animation:sh3 var(--d) ease-in forwards}
+.go .s-top::after{opacity:.55;animation:sh2 var(--d) ease-in forwards}
+@keyframes ft{to{transform:rotateX(-90deg)}}
+@keyframes fb{to{transform:rotateX(0)}}
+@keyframes sh1{to{opacity:.6}}
+@keyframes sh2{to{opacity:0}}
+@keyframes sh3{to{opacity:.55}}
+.hinge{position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;background:linear-gradient(#000,#050505 50%,#2a2a2a);z-index:5}
+.knob{position:absolute;top:50%;width:var(--kw,12px);height:var(--kh,46px);margin-top:calc(var(--kh,46px)/-2);z-index:6;background:linear-gradient(90deg,#4a0710,#b3122a 28%,#ff4d5e 48%,#c8142b 68%,#5c0a14);box-shadow:0 2px 5px rgba(90,0,10,.45)}
+.card.a .knob{left:calc(var(--kw,12px)*-1);border-radius:6px 2px 2px 6px}
+.card.b .knob{right:calc(var(--kw,12px)*-1);border-radius:2px 6px 6px 2px}
+.card.a .knob.r,.card.b .knob.l{display:none}
+.pair>.knob.mid{left:50%;transform:translateX(-50%);border-radius:6px;z-index:7}
+.card.m .knob{display:none}
+#mb{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;z-index:20;width:44px;height:38px;padding:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;opacity:.9}
+#mb i{width:20px;height:2.5px;background:#fff;border-radius:2px}
+.sc{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}.sc.show{display:block}
+.dr{position:fixed;top:0;bottom:0;left:0;width:min(80vw,320px);background:#fff;z-index:40;transform:translateX(-105%);transition:transform .25s;box-shadow:6px 0 24px rgba(0,0,0,.3);padding:calc(env(safe-area-inset-top,0px) + 18px) 0 20px;overflow-y:auto;touch-action:pan-y}
+.dr.show{transform:none}
+.dr .it{display:block;width:100%;text-align:start;background:none;box-shadow:none;color:#222;border-radius:0;padding:15px 22px;font-size:17px}
+.dr .hd{font-weight:700}
+#hr{color:#c8142b}
+.sub{display:none;background:#f6f5f3}.sub.show{display:block}
+.sub .it{padding-left:38px;font-size:16px;font-weight:600}.sub .it.off{opacity:.45}
+.pg{position:fixed;inset:0;background:#fff;z-index:50;overflow-y:auto;touch-action:pan-y;display:none}.pg.show{display:block}
+.pt{position:sticky;top:0;background:#fff;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;font-weight:700;font-size:18px;color:#222;z-index:2}
+.pt button{width:40px;height:36px;padding:0;font-size:18px}
+.ar{direction:rtl;font-family:"Amiri Quran",Amiri,"Noto Naskh Arabic","Traditional Arabic","Geeza Pro",serif;color:#111}
+.ay{padding:14px 20px;border-bottom:1px solid #f0efed}.ay .ar{font-size:28px;line-height:2.1}.ay small{font-size:14px;color:#aaa}
+.nm{display:flex;gap:14px;align-items:center;padding:12px 18px;border-bottom:1px solid #f0efed}
+.nm b{color:#c8142b;width:26px;font-size:14px}.nm .ar{font-size:30px;min-width:100px;text-align:center}
+.nm span{display:block}.nm .t{font-weight:700;color:#222}.nm .m{font-size:14px;color:#666}
+.pg.mus{background:#fdf0d5}
+.mus .pt{background:#fdf0d5;border-bottom:1px solid #cdb98a}
+.mf{margin:26px 22px 40px;padding:14px 12px 22px;background:#fdf0d5;border:2px solid #8a7144;box-shadow:0 0 0 5px #fdf0d5,0 0 0 8px #8a7144,inset 0 0 0 4px #fdf0d5,inset 0 0 0 6px #b9a273}
+.sn{border:2px solid #8a7144;border-radius:10px;background:#f6e4b8;padding:6px;text-align:center;font-size:26px;margin-bottom:8px}
+.bs{text-align:center;font-size:28px;margin:4px 0}
+.tx{font-size:clamp(26px,7.2vw,34px);line-height:2.3;text-align:justify;text-align-last:center}
+.vn{display:inline-flex;align-items:center;justify-content:center;width:1.5em;height:1.5em;border-radius:50%;background:#8a7144;color:#fdf0d5;font-size:.46em;margin:0 .5em;vertical-align:middle;line-height:1}
+.row{display:flex;gap:14px;align-items:center}
+*{-webkit-tap-highlight-color:transparent}
+button,.card,.pair{outline:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button:focus,button:focus-visible{outline:none}
+button{touch-action:manipulation;border:0;cursor:pointer;font-weight:700;border-radius:999px;background:var(--btn);color:var(--btnt);box-shadow:0 6px 14px rgba(0,0,0,.25)}
+button:active{transform:scale(.96)}
+#next{width:var(--bs,120px);height:var(--bs,120px);padding:0;border-radius:50%;background:radial-gradient(circle at 35% 28%,#ff6b7a,#d4182c 48%,#8f0c1a);box-shadow:0 8px 18px rgba(143,12,26,.45),inset 0 -4px 8px rgba(0,0,0,.25)}
+.sec{font-size:16px;padding:12px 20px;opacity:.8}
+@media (orientation:landscape) and (max-height:500px){
+.row{display:none}
+body{gap:0}
+.pair{--w:min(34vh,160px)}
+.pair.small{--w:min(9vh,34px)}
+.totalrow{bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+}
+</style>
+</head>
+<body>
+<div class="pair" id="pair"></div>
+<div class="row">
+  <button id="next" aria-label="İleri"></button>
+</div>
+<button id="mb" aria-label="Menü"><i></i><i></i><i></i></button>
+<div class="sc" id="sc"></div>
+<div class="dr" id="dr"><button class="it hd" id="hq">Kur'an-ı Kerim ▾</button><div class="sub" id="sq"></div><button class="it hd" id="he">Esmaül Hüsna</button><button class="it hd" id="hr"></button><button class="it hd" id="hl"></button><div class="sub" id="sl"></div></div>
+<div class="pg" id="pg"><div class="pt"><button id="pb">←</button><span id="ptt"></span></div><div id="pc"></div></div>
+<button id="reset">Sıfırla</button>
+<div class="ov" id="ov"><div class="dlg"><p>Sayaç sıfırlansın mı?</p><div class="bt"><button id="no">Vazgeç</button><button id="ok">Evet, sıfırla</button></div></div></div>
+<div class="totalrow"><span class="lbl">Toplam</span><div class="pair small" id="total"></div></div>
+<script>
+function Card(v){
+  var c=document.createElement('div');c.className='card';
+  c.innerHTML='<div class="half top s-top"><div class="num"></div></div><div class="half bot s-bot"><div class="num"></div></div><div class="half top flap f-top"><div class="num"></div></div><div class="half bot flap f-bot"><div class="num"></div></div><div class="hinge"></div><div class="knob l"></div><div class="knob r"></div>';
+  var q=function(s){return c.querySelector(s+' .num')};
+  var sT=q('.s-top'),sB=q('.s-bot'),fT=q('.f-top'),fB=q('.f-bot');
+  var self={el:c};
+  [sT,sB,fT,fB].forEach(function(e){e.textContent=v});
+  var cur=v,timer=null;
+  function finish(){clearTimeout(timer);sT.textContent=cur;sB.textContent=cur;c.classList.remove('go')}
+  self.set=function(nv){
+    if(nv===cur)return;
+    finish();
+    sT.textContent=nv;fT.textContent=cur;fB.textContent=nv;
+    void c.offsetWidth;c.classList.add('go');
+    var t=nv;cur=nv;
+    timer=setTimeout(function(){sB.textContent=t;c.classList.remove('go')},300);
+  };
+  return self;
+}
+function Counter(host,digits,val){
+  var cs=[],i;
+  function split(n){var a=[],k;for(k=digits-1;k>=0;k--)a.push(Math.floor(n/Math.pow(10,k))%10);return a}
+  var d=split(val);
+  for(i=0;i<digits;i++){var c=Card(d[i]);c.el.classList.add(i===0?'a':i===digits-1?'b':'m');host.appendChild(c.el);cs.push(c)}
+  for(i=1;i<digits;i++){var m=document.createElement('div');m.className='knob mid';m.style.left='calc(var(--w)*'+i+' + var(--g,12px)*'+(i-1)+' + var(--g,12px)/2)';host.appendChild(m)}
+  return {set:function(n){var a=split(n);for(var k=0;k<digits;k++)cs[k].set(a[k])}};
+}
+var n=9,total=0,TK='flip-total';
+try{var t0=parseInt(localStorage.getItem(TK),10);if(t0>=0&&t0<100000)total=t0}catch(e){}
+function saveTotal(){try{localStorage.setItem(TK,String(total))}catch(e){}}
+var main=Counter(document.getElementById('pair'),3,n),tot=Counter(document.getElementById('total'),5,total);
+function go(v){n=((v%1000)+1000)%1000;main.set(n)}
+var nextBtn=document.getElementById('next');
+nextBtn.onclick=function(){if(Date.now()-lastPinch<350)return;total=(total+1)%100000;tot.set(total);saveTotal();go(n+1)};
+var ov=document.getElementById('ov');
+var pend=null;
+function ask(m,f){document.querySelector('.dlg p').textContent=m;pend=f;ov.classList.add('show')}
+document.getElementById('reset').onclick=function(){ask(L('c1'),function(){go(0)})};
+document.getElementById('hr').onclick=function(){openDr(false);ask(L('c2'),function(){total=0;tot.set(0);saveTotal()})};
+document.getElementById('no').onclick=function(){ov.classList.remove('show')};
+document.getElementById('ok').onclick=function(){ov.classList.remove('show');if(pend)pend();pend=null};
+var size=120,KEY='flip-bs',ptrs={},d0=0,s0=0,lastPinch=0;
+try{var sv=parseFloat(localStorage.getItem(KEY));if(sv>=56&&sv<=300)size=sv}catch(e){}
+function setSize(v){size=Math.max(56,Math.min(300,v));document.documentElement.style.setProperty('--bs',size+'px')}
+function saveSize(){try{localStorage.setItem(KEY,String(size))}catch(e){}}
+function dist(){var k=Object.keys(ptrs),a=ptrs[k[0]],b=ptrs[k[1]];return Math.hypot(a.x-b.x,a.y-b.y)}
+setSize(size);
+document.addEventListener('pointerdown',function(e){ptrs[e.pointerId]={x:e.clientX,y:e.clientY};if(Object.keys(ptrs).length===2){d0=dist();s0=size;lastPinch=Date.now()}});
+document.addEventListener('pointermove',function(e){if(!ptrs[e.pointerId])return;ptrs[e.pointerId]={x:e.clientX,y:e.clientY};if(Object.keys(ptrs).length===2&&d0>10){setSize(s0*dist()/d0);lastPinch=Date.now()}});
+function up(e){var was=Object.keys(ptrs).length;delete ptrs[e.pointerId];if(was>=2){lastPinch=Date.now();saveSize()}}
+document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up);
+nextBtn.addEventListener('wheel',function(e){e.preventDefault();setSize(size*(e.deltaY<0?1.06:.94));saveSize()},{passive:false});
+var SUR={
+"Fâtiha":["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ","الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ","الرَّحْمَٰنِ الرَّحِيمِ","مَالِكِ يَوْمِ الدِّينِ","إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ","اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ","صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"],
+"İhlâs":["قُلْ هُوَ اللَّهُ أَحَدٌ","اللَّهُ الصَّمَدُ","لَمْ يَلِدْ وَلَمْ يُولَدْ","وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ"],
+"Felak":["قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ","مِنْ شَرِّ مَا خَلَقَ","وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ","وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ","وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ"],
+"Nâs":["قُلْ أَعُوذُ بِرَبِّ النَّاسِ","مَلِكِ النَّاسِ","إِلَٰهِ النَّاسِ","مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ","الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ","مِنَ الْجِنَّةِ وَالنَّاسِ"],
+"Kevser":["إِنَّا أَعْطَيْنَاكَ الْكَوْثَرَ","فَصَلِّ لِرَبِّكَ وَانْحَرْ","إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ"],
+"Asr":["وَالْعَصْرِ","إِنَّ الْإِنسَانَ لَفِي خُسْرٍ","إِلَّا الَّذِينَ آمَنُوا وَعَمِلُوا الصَّالِحَاتِ وَتَوَاصَوْا بِالْحَقِّ وَتَوَاصَوْا بِالصَّبْرِ"],
+"Nasr":["إِذَا جَاءَ نَصْرُ اللَّهِ وَالْفَتْحُ","وَرَأَيْتَ النَّاسَ يَدْخُلُونَ فِي دِينِ اللَّهِ أَفْوَاجًا","فَسَبِّحْ بِحَمْدِ رَبِّكَ وَاسْتَغْفِرْهُ إِنَّهُ كَانَ تَوَّابًا"]};
+var ESMA=`الرحمن|Er-Rahmân|Dünyada tüm canlılara merhamet eden
+الرحيم|Er-Rahîm|Âhirette müminlere merhamet eden
+الملك|El-Melik|Mülkün gerçek sahibi
+القدوس|El-Kuddûs|Her türlü eksiklikten uzak
+السلام|Es-Selâm|Esenlik ve selamet veren
+المؤمن|El-Mü'min|Güven veren
+المهيمن|El-Müheymin|Her şeyi gözetip koruyan
+العزيز|El-Azîz|İzzet sahibi, mağlup edilemeyen
+الجبار|El-Cebbâr|Dilediğini yaptıran, üstün olan
+المتكبر|El-Mütekebbir|Büyüklükte eşi olmayan
+الخالق|El-Hâlık|Yaratan
+البارئ|El-Bâri'|Yoktan var eden
+المصور|El-Musavvir|Her şeye şekil veren
+الغفار|El-Gaffâr|Çok bağışlayan
+القهار|El-Kahhâr|Her şeye galip gelen
+الوهاب|El-Vehhâb|Karşılıksız çok veren
+الرزاق|Er-Rezzâk|Rızık veren
+الفتاح|El-Fettâh|Hayır kapılarını açan
+العليم|El-Alîm|Her şeyi bilen
+القابض|El-Kâbıd|Daraltan, tutan
+الباسط|El-Bâsıt|Genişleten, açan
+الخافض|El-Hâfıd|Alçaltan
+الرافع|Er-Râfi'|Yükselten
+المعز|El-Mu'ız|İzzet verip şereflendiren
+المذل|El-Müzill|Zillete düşüren
+السميع|Es-Semî'|Her şeyi işiten
+البصير|El-Basîr|Her şeyi gören
+الحكم|El-Hakem|Hükmeden, hak ile karar veren
+العدل|El-Adl|Mutlak adalet sahibi
+اللطيف|El-Latîf|Lütuf sahibi, ince işleri bilen
+الخبير|El-Habîr|Her şeyden haberdar
+الحليم|El-Halîm|Yumuşak davranan, acele etmeyen
+العظيم|El-Azîm|Pek yüce, azamet sahibi
+الغفور|El-Gafûr|Çok affeden
+الشكور|Eş-Şekûr|Az amele çok sevap veren
+العلي|El-Aliyy|Çok yüce
+الكبير|El-Kebîr|Pek büyük
+الحفيظ|El-Hafîz|Koruyan, gözeten
+المقيت|El-Mukît|Besin ve güç veren
+الحسيب|El-Hasîb|Hesaba çeken, yeten
+الجليل|El-Celîl|Celal ve azamet sahibi
+الكريم|El-Kerîm|Çok cömert
+الرقيب|Er-Rakîb|Her an gözeten
+المجيب|El-Mücîb|Duaları kabul eden
+الواسع|El-Vâsi'|İlmi ve rahmeti geniş
+الحكيم|El-Hakîm|Her işi hikmetli
+الودود|El-Vedûd|Seven ve sevilen
+المجيد|El-Mecîd|Şanı büyük
+الباعث|El-Bâis|Ölüleri dirilten
+الشهيد|Eş-Şehîd|Her şeye şahit olan
+الحق|El-Hak|Varlığı gerçek ve değişmez
+الوكيل|El-Vekîl|Güvenilip dayanılan
+القوي|El-Kaviyy|Çok kuvvetli
+المتين|El-Metîn|Çok sağlam
+الولي|El-Veliyy|Yardım eden dost
+الحميد|El-Hamîd|Övülmeye layık
+المحصي|El-Muhsî|Her şeyi sayan
+المبدئ|El-Mübdi'|İlk defa yaratan
+المعيد|El-Mu'îd|Yeniden yaratan
+المحيي|El-Muhyî|Hayat veren
+المميت|El-Mümît|Öldüren
+الحي|El-Hayy|Daima diri
+القيوم|El-Kayyûm|Her şeyi ayakta tutan
+الواجد|El-Vâcid|Her şeyi bulan, zengin
+الماجد|El-Mâcid|Şanı yüce, cömert
+الواحد|El-Vâhid|Bir olan
+الأحد|El-Ehad|Tek olan
+الصمد|Es-Samed|Hiçbir şeye muhtaç olmayan
+القادر|El-Kâdir|Gücü yeten
+المقتدر|El-Muktedir|Her şeye kudreti yeten
+المقدم|El-Mukaddim|Öne alan
+المؤخر|El-Mü'ahhir|Geri bırakan
+الأول|El-Evvel|Başlangıcı olmayan
+الآخر|El-Âhir|Sonu olmayan
+الظاهر|Ez-Zâhir|Varlığı apaçık olan
+الباطن|El-Bâtın|Zatı gizli olan
+الوالي|El-Vâlî|Her şeyi idare eden
+المتعالي|El-Müteâlî|Pek yüce
+البر|El-Berr|İyilik eden
+التواب|Et-Tevvâb|Tövbeleri kabul eden
+المنتقم|El-Müntekım|Zalimleri cezalandıran
+العفو|El-Afüvv|Çok affeden
+الرؤوف|Er-Raûf|Çok şefkatli
+مالك الملك|Mâlikü'l-Mülk|Mülkün sahibi
+ذو الجلال والإكرام|Zü'l-Celâli ve'l-İkrâm|Celal ve ikram sahibi
+المقسط|El-Muksit|Adaletle hükmeden
+الجامع|El-Câmi'|Toplayan
+الغني|El-Ganiyy|Hiçbir şeye ihtiyacı olmayan
+المغني|El-Muğnî|Zengin eden
+المانع|El-Mâni'|Engelleyen
+الضار|Ed-Dârr|Zarar verecek şeyi yaratan
+النافع|En-Nâfi'|Fayda veren
+النور|En-Nûr|Nur veren, aydınlatan
+الهادي|El-Hâdî|Hidayet veren
+البديع|El-Bedî'|Eşsiz yaratan
+الباقي|El-Bâkî|Varlığı sonsuz
+الوارث|El-Vârîs|Her şeyin asıl sahibi
+الرشيد|Er-Reşîd|Doğru yola ileten
+الصبور|Es-Sabûr|Çok sabırlı`.split("\n");
+var ARN={"Fâtiha":"سُورَةُ الْفَاتِحَةِ","İhlâs":"سُورَةُ الْإِخْلَاصِ","Felak":"سُورَةُ الْفَلَقِ","Nâs":"سُورَةُ النَّاسِ","Kevser":"سُورَةُ الْكَوْثَرِ","Asr":"سُورَةُ الْعَصْرِ","Nasr":"سُورَةُ النَّصْرِ"};
+function ad(n){return String(n).replace(/\d/g,function(d){return '٠١٢٣٤٥٦٧٨٩'[d]})}
+var MEAN={en:"The Most Compassionate|The Most Merciful|The Sovereign King|The Most Holy|The Source of Peace|The Giver of Security|The Guardian|The Almighty|The Compeller|The Supreme in Greatness|The Creator|The Originator|The Fashioner of Forms|The Great Forgiver|The Subduer|The Bestower|The Provider|The Opener|The All-Knowing|The Withholder|The Expander|The Abaser|The Exalter|The Giver of Honor|The Giver of Dishonor|The All-Hearing|The All-Seeing|The Judge|The Utterly Just|The Subtle, Most Gentle|The All-Aware|The Forbearing|The Magnificent|The Oft-Forgiving|The Appreciative|The Most High|The Most Great|The Preserver|The Sustainer|The Reckoner|The Majestic|The Most Generous|The Watchful|The Responsive|The All-Encompassing|The Perfectly Wise|The Most Loving|The Glorious|The Resurrector|The Witness|The Absolute Truth|The Trustee|The All-Strong|The Firm|The Protecting Friend|The Praiseworthy|The Counter|The Originator of All|The Restorer|The Giver of Life|The Giver of Death|The Ever-Living|The Self-Subsisting|The Finder|The Noble|The One|The Unique|The Eternal Refuge|The All-Powerful|The Omnipotent|The Expediter|The Delayer|The First|The Last|The Manifest|The Hidden|The Governor|The Exalted|The Source of Goodness|The Accepter of Repentance|The Avenger|The Pardoner|The Most Kind|Owner of All Sovereignty|Lord of Majesty and Honor|The Equitable|The Gatherer|The Self-Sufficient|The Enricher|The Preventer|The Creator of Harm|The Giver of Benefit|The Light|The Guide|The Incomparable Originator|The Everlasting|The Inheritor|The Guide to the Right Path|The Most Patient".split("|"),id:"Maha Pengasih|Maha Penyayang|Maha Merajai|Maha Suci|Sumber Kedamaian|Pemberi Keamanan|Maha Memelihara|Maha Perkasa|Maha Memaksa|Maha Megah|Maha Pencipta|Maha Pembuat|Maha Pembentuk Rupa|Maha Pengampun|Maha Menundukkan|Maha Pemberi Karunia|Maha Pemberi Rezeki|Maha Pembuka|Maha Mengetahui|Maha Menyempitkan|Maha Melapangkan|Maha Merendahkan|Maha Meninggikan|Maha Pemberi Kemuliaan|Maha Menghinakan|Maha Mendengar|Maha Melihat|Maha Menetapkan Hukum|Maha Adil|Maha Lembut|Maha Mengetahui Secara Mendalam|Maha Penyantun|Maha Agung|Maha Pengampun|Maha Pembalas Syukur|Maha Tinggi|Maha Besar|Maha Memelihara|Maha Pemberi Kecukupan|Maha Penghitung|Maha Luhur|Maha Pemurah|Maha Mengawasi|Maha Mengabulkan|Maha Luas|Maha Bijaksana|Maha Pengasih dan Dikasihi|Maha Mulia|Maha Membangkitkan|Maha Menyaksikan|Maha Benar|Maha Pemelihara Urusan|Maha Kuat|Maha Kokoh|Maha Pelindung|Maha Terpuji|Maha Menghitung|Maha Memulai|Maha Mengembalikan|Maha Menghidupkan|Maha Mematikan|Maha Hidup|Maha Berdiri Sendiri|Maha Menemukan|Maha Mulia|Maha Esa|Maha Tunggal|Maha Tempat Bergantung|Maha Kuasa|Maha Berkuasa|Maha Mendahulukan|Maha Mengakhirkan|Maha Awal|Maha Akhir|Maha Nyata|Maha Tersembunyi|Maha Pengatur|Maha Tinggi|Maha Baik|Maha Penerima Tobat|Maha Pemberi Balasan|Maha Pemaaf|Maha Santun|Pemilik Kerajaan|Pemilik Keagungan dan Kemuliaan|Maha Adil|Maha Mengumpulkan|Maha Kaya|Maha Pemberi Kekayaan|Maha Mencegah|Maha Pemberi Mudarat|Maha Pemberi Manfaat|Maha Cahaya|Maha Pemberi Petunjuk|Maha Pencipta Tanpa Contoh|Maha Kekal|Maha Pewaris|Maha Pembimbing|Maha Sabar".split("|"),ha:"Mai Rahama|Mai Jinƙai|Sarki|Tsarkakakke|Mai Aminci|Mai Ba da Tsaro|Mai Kulawa|Mai Girma da Ƙarfi|Mai Tilastawa|Mai Girman Kai Mafi Girma|Mahalicci|Mai Ƙirƙira|Mai Siffantawa|Mai Gafara Sosai|Mai Rinjaye|Mai Baiwa|Mai Arzutawa|Mai Buɗewa|Masani|Mai Riƙewa|Mai Shimfiɗawa|Mai Ƙasƙantarwa|Mai Ɗaukakawa|Mai Ɗaukaka|Mai Wulaƙantarwa|Mai Ji|Mai Gani|Mai Yin Hukunci|Mai Adalci|Mai Tausayi Mai Ilimin Ɓoyayyun Abubuwa|Mai Cikakken Labari|Mai Haƙuri|Mai Girma|Mai Gafara|Mai Godiya|Maɗaukaki|Mafi Girma|Mai Tsarewa|Mai Ciyarwa|Mai Hisabi|Mai Ɗaukaka da Girma|Mai Karimci|Mai Sa Ido|Mai Amsawa|Mai Faɗi|Mai Hikima|Mai Ƙauna|Mai Daraja|Mai Tayarwa|Mai Shaida|Gaskiya|Wakili|Mai Ƙarfi|Mai Ƙarfi Ƙwarai|Aboki Mai Taimako|Abin Yabo|Mai Ƙididdiga|Mai Fara Halitta|Mai Maimaitawa|Mai Rayarwa|Mai Kashewa|Mai Rai|Mai Tsayuwa da Kansa|Mai Samu|Mai Daraja|Ɗaya|Makaɗaici|Wanda Ake Dogara da Shi|Mai Iko|Mai Cikakken Iko|Mai Gabatarwa|Mai Jinkirtawa|Na Farko|Na Ƙarshe|Bayyananne|Ɓoyayye|Mai Mulki|Maɗaukaki|Mai Alheri|Mai Karɓar Tuba|Mai Ɗaukar Fansa|Mai Yafewa|Mai Tausayi|Mamallakin Mulki|Ma'abocin Ɗaukaka da Girma|Mai Adalci|Mai Tarawa|Mawadaci|Mai Wadatarwa|Mai Hanawa|Mai Halittar Cuta|Mai Amfanarwa|Haske|Mai Shiryarwa|Mai Ƙirƙira Mara Misali|Dawwamamme|Magaji|Mai Nuna Hanya Madaidaiciya|Mai Yawan Haƙuri".split("|")};
+var dr=document.getElementById('dr'),sc=document.getElementById('sc'),pg=document.getElementById('pg'),sq=document.getElementById('sq');
+function openDr(b){dr.classList.toggle('show',b);sc.classList.toggle('show',b)}
+function showPg(t,h,c){document.getElementById('ptt').textContent=t;document.getElementById('pc').innerHTML=h;pg.className='pg show'+(c?' '+c:'');pg.scrollTop=0;openDr(false)}
+var T={
+tr:{q:"Kur'an-ı Kerim",e:"Esmaül Hüsna",x:"Toplamı Sıfırla",r:"Sıfırla",c1:"Sayaç sıfırlansın mı?",c2:"Toplam sayı sıfırlansın mı?",no:"Vazgeç",ok:"Evet, sıfırla",t:"Toplam",s:"Suresi",soon:"yakında",l:"Dil"},
+en:{q:"Holy Quran",e:"Asma ul-Husna",x:"Reset Total",r:"Reset",c1:"Reset the counter?",c2:"Reset the total count?",no:"Cancel",ok:"Yes, reset",t:"Total",s:"Surah",soon:"soon",l:"Language"},
+ar:{q:"القرآن الكريم",e:"أسماء الله الحسنى",x:"تصفير المجموع",r:"تصفير",c1:"هل تريد تصفير العداد؟",c2:"هل تريد تصفير المجموع؟",no:"إلغاء",ok:"نعم، صفّر",t:"المجموع",s:"سورة",soon:"قريباً",l:"اللغة"},
+id:{q:"Al-Qur'an",e:"Asmaul Husna",x:"Atur Ulang Total",r:"Atur Ulang",c1:"Atur ulang penghitung?",c2:"Atur ulang jumlah total?",no:"Batal",ok:"Ya, atur ulang",t:"Total",s:"Surah",soon:"segera",l:"Bahasa"},
+ur:{q:"قرآن مجید",e:"اسماء الحسنیٰ",x:"کل تعداد صفر کریں",r:"صفر کریں",c1:"کیا کاؤنٹر صفر کریں؟",c2:"کیا کل تعداد صفر کریں؟",no:"منسوخ",ok:"ہاں، صفر کریں",t:"کل",s:"سورۃ",soon:"جلد",l:"زبان"},
+hi:{q:"क़ुरआन शरीफ़",e:"अस्माउल हुस्ना",x:"कुल गिनती रीसेट करें",r:"रीसेट",c1:"क्या काउंटर रीसेट करें?",c2:"क्या कुल गिनती रीसेट करें?",no:"रद्द करें",ok:"हाँ, रीसेट करें",t:"कुल",s:"सूरह",soon:"जल्द",l:"भाषा"},
+ha:{q:"Alƙur'ani Mai Girma",e:"Asmaul Husna",x:"Sake Jimilla",r:"Sake",c1:"A sake kirgar?",c2:"A sake jimillar?",no:"Soke",ok:"Eh, sake",t:"Jimilla",s:"Sura",soon:"nan ba da daɗewa ba",l:"Harshe"}};
+var LANGS=[['tr','Türkçe'],['en','English'],['ar','العربية'],['id','Bahasa Indonesia'],['ur','اردو'],['hi','हिन्दी'],['ha','Hausa']];
+var lang='tr';try{lang=localStorage.getItem('flip-lang')||'tr'}catch(e){}
+if(!T[lang])lang='tr';
+function L(k){return T[lang][k]}
+function nm(k){return lang==='tr'?k+' Suresi':L('s')+' '+k}
+var BIS='بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+SUR["Yâsîn"]=["يس", "وَالْقُرْآنِ الْحَكِيمِ", "إِنَّكَ لَمِنَ الْمُرْسَلِينَ", "عَلَىٰ صِرَاطٍ مُسْتَقِيمٍ", "تَنْزِيلَ الْعَزِيزِ الرَّحِيمِ", "لِتُنْذِرَ قَوْمًا مَا أُنْذِرَ آبَاؤُهُمْ فَهُمْ غَافِلُونَ", "لَقَدْ حَقَّ الْقَوْلُ عَلَىٰ أَكْثَرِهِمْ فَهُمْ لَا يُؤْمِنُونَ", "إِنَّا جَعَلْنَا فِي أَعْنَاقِهِمْ أَغْلَالًا فَهِيَ إِلَى الْأَذْقَانِ فَهُمْ مُقْمَحُونَ", "وَجَعَلْنَا مِنْ بَيْنِ أَيْدِيهِمْ سَدًّا وَمِنْ خَلْفِهِمْ سَدًّا فَأَغْشَيْنَاهُمْ فَهُمْ لَا يُبْصِرُونَ", "وَسَوَاءٌ عَلَيْهِمْ أَأَنْذَرْتَهُمْ أَمْ لَمْ تُنْذِرْهُمْ لَا يُؤْمِنُونَ", "إِنَّمَا تُنْذِرُ مَنِ اتَّبَعَ الذِّكْرَ وَخَشِيَ الرَّحْمَٰنَ بِالْغَيْبِ ۖ فَبَشِّرْهُ بِمَغْفِرَةٍ وَأَجْرٍ كَرِيمٍ", "إِنَّا نَحْنُ نُحْيِي الْمَوْتَىٰ وَنَكْتُبُ مَا قَدَّمُوا وَآثَارَهُمْ ۚ وَكُلَّ شَيْءٍ أَحْصَيْنَاهُ فِي إِمَامٍ مُبِينٍ", "وَاضْرِبْ لَهُمْ مَثَلًا أَصْحَابَ الْقَرْيَةِ إِذْ جَاءَهَا الْمُرْسَلُونَ", "إِذْ أَرْسَلْنَا إِلَيْهِمُ اثْنَيْنِ فَكَذَّبُوهُمَا فَعَزَّزْنَا بِثَالِثٍ فَقَالُوا إِنَّا إِلَيْكُمْ مُرْسَلُونَ", "قَالُوا مَا أَنْتُمْ إِلَّا بَشَرٌ مِثْلُنَا وَمَا أَنْزَلَ الرَّحْمَٰنُ مِنْ شَيْءٍ إِنْ أَنْتُمْ إِلَّا تَكْذِبُونَ", "قَالُوا رَبُّنَا يَعْلَمُ إِنَّا إِلَيْكُمْ لَمُرْسَلُونَ", "وَمَا عَلَيْنَا إِلَّا الْبَلَاغُ الْمُبِينُ", "قَالُوا إِنَّا تَطَيَّرْنَا بِكُمْ ۖ لَئِنْ لَمْ تَنْتَهُوا لَنَرْجُمَنَّكُمْ وَلَيَمَسَّنَّكُمْ مِنَّا عَذَابٌ أَلِيمٌ", "قَالُوا طَائِرُكُمْ مَعَكُمْ ۚ أَئِنْ ذُكِّرْتُمْ ۚ بَلْ أَنْتُمْ قَوْمٌ مُسْرِفُونَ", "وَجَاءَ مِنْ أَقْصَى الْمَدِينَةِ رَجُلٌ يَسْعَىٰ قَالَ يَا قَوْمِ اتَّبِعُوا الْمُرْسَلِينَ", "اتَّبِعُوا مَنْ لَا يَسْأَلُكُمْ أَجْرًا وَهُمْ مُهْتَدُونَ", "وَمَا لِيَ لَا أَعْبُدُ الَّذِي فَطَرَنِي وَإِلَيْهِ تُرْجَعُونَ", "أَأَتَّخِذُ مِنْ دُونِهِ آلِهَةً إِنْ يُرِدْنِ الرَّحْمَٰنُ بِضُرٍّ لَا تُغْنِ عَنِّي شَفَاعَتُهُمْ شَيْئًا وَلَا يُنْقِذُونِ", "إِنِّي إِذًا لَفِي ضَلَالٍ مُبِينٍ", "إِنِّي آمَنْتُ بِرَبِّكُمْ فَاسْمَعُونِ", "قِيلَ ادْخُلِ الْجَنَّةَ ۖ قَالَ يَا لَيْتَ قَوْمِي يَعْلَمُونَ", "بِمَا غَفَرَ لِي رَبِّي وَجَعَلَنِي مِنَ الْمُكْرَمِينَ", "وَمَا أَنْزَلْنَا عَلَىٰ قَوْمِهِ مِنْ بَعْدِهِ مِنْ جُنْدٍ مِنَ السَّمَاءِ وَمَا كُنَّا مُنْزِلِينَ", "إِنْ كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً فَإِذَا هُمْ خَامِدُونَ", "يَا حَسْرَةً عَلَى الْعِبَادِ ۚ مَا يَأْتِيهِمْ مِنْ رَسُولٍ إِلَّا كَانُوا بِهِ يَسْتَهْزِئُونَ", "أَلَمْ يَرَوْا كَمْ أَهْلَكْنَا قَبْلَهُمْ مِنَ الْقُرُونِ أَنَّهُمْ إِلَيْهِمْ لَا يَرْجِعُونَ", "وَإِنْ كُلٌّ لَمَّا جَمِيعٌ لَدَيْنَا مُحْضَرُونَ", "وَآيَةٌ لَهُمُ الْأَرْضُ الْمَيْتَةُ أَحْيَيْنَاهَا وَأَخْرَجْنَا مِنْهَا حَبًّا فَمِنْهُ يَأْكُلُونَ", "وَجَعَلْنَا فِيهَا جَنَّاتٍ مِنْ نَخِيلٍ وَأَعْنَابٍ وَفَجَّرْنَا فِيهَا مِنَ الْعُيُونِ", "لِيَأْكُلُوا مِنْ ثَمَرِهِ وَمَا عَمِلَتْهُ أَيْدِيهِمْ ۖ أَفَلَا يَشْكُرُونَ", "سُبْحَانَ الَّذِي خَلَقَ الْأَزْوَاجَ كُلَّهَا مِمَّا تُنْبِتُ الْأَرْضُ وَمِنْ أَنْفُسِهِمْ وَمِمَّا لَا يَعْلَمُونَ", "وَآيَةٌ لَهُمُ اللَّيْلُ نَسْلَخُ مِنْهُ النَّهَارَ فَإِذَا هُمْ مُظْلِمُونَ", "وَالشَّمْسُ تَجْرِي لِمُسْتَقَرٍّ لَهَا ۚ ذَٰلِكَ تَقْدِيرُ الْعَزِيزِ الْعَلِيمِ", "وَالْقَمَرَ قَدَّرْنَاهُ مَنَازِلَ حَتَّىٰ عَادَ كَالْعُرْجُونِ الْقَدِيمِ", "لَا الشَّمْسُ يَنْبَغِي لَهَا أَنْ تُدْرِكَ الْقَمَرَ وَلَا اللَّيْلُ سَابِقُ النَّهَارِ ۚ وَكُلٌّ فِي فَلَكٍ يَسْبَحُونَ", "وَآيَةٌ لَهُمْ أَنَّا حَمَلْنَا ذُرِّيَّتَهُمْ فِي الْفُلْكِ الْمَشْحُونِ", "وَخَلَقْنَا لَهُمْ مِنْ مِثْلِهِ مَا يَرْكَبُونَ", "وَإِنْ نَشَأْ نُغْرِقْهُمْ فَلَا صَرِيخَ لَهُمْ وَلَا هُمْ يُنْقَذُونَ", "إِلَّا رَحْمَةً مِنَّا وَمَتَاعًا إِلَىٰ حِينٍ", "وَإِذَا قِيلَ لَهُمُ اتَّقُوا مَا بَيْنَ أَيْدِيكُمْ وَمَا خَلْفَكُمْ لَعَلَّكُمْ تُرْحَمُونَ", "وَمَا تَأْتِيهِمْ مِنْ آيَةٍ مِنْ آيَاتِ رَبِّهِمْ إِلَّا كَانُوا عَنْهَا مُعْرِضِينَ", "وَإِذَا قِيلَ لَهُمْ أَنْفِقُوا مِمَّا رَزَقَكُمُ اللَّهُ قَالَ الَّذِينَ كَفَرُوا لِلَّذِينَ آمَنُوا أَنُطْعِمُ مَنْ لَوْ يَشَاءُ اللَّهُ أَطْعَمَهُ إِنْ أَنْتُمْ إِلَّا فِي ضَلَالٍ مُبِينٍ", "وَيَقُولُونَ مَتَىٰ هَٰذَا الْوَعْدُ إِنْ كُنْتُمْ صَادِقِينَ", "مَا يَنْظُرُونَ إِلَّا صَيْحَةً وَاحِدَةً تَأْخُذُهُمْ وَهُمْ يَخِصِّمُونَ", "فَلَا يَسْتَطِيعُونَ تَوْصِيَةً وَلَا إِلَىٰ أَهْلِهِمْ يَرْجِعُونَ", "وَنُفِخَ فِي الصُّورِ فَإِذَا هُمْ مِنَ الْأَجْدَاثِ إِلَىٰ رَبِّهِمْ يَنْسِلُونَ", "قَالُوا يَا وَيْلَنَا مَنْ بَعَثَنَا مِنْ مَرْقَدِنَا ۜ هَٰذَا مَا وَعَدَ الرَّحْمَٰنُ وَصَدَقَ الْمُرْسَلُونَ", "إِنْ كَانَتْ إِلَّا صَيْحَةً وَاحِدَةً فَإِذَا هُمْ جَمِيعٌ لَدَيْنَا مُحْضَرُونَ", "فَالْيَوْمَ لَا تُظْلَمُ نَفْسٌ شَيْئًا وَلَا تُجْزَوْنَ إِلَّا مَا كُنْتُمْ تَعْمَلُونَ", "إِنَّ أَصْحَابَ الْجَنَّةِ الْيَوْمَ فِي شُغُلٍ فَاكِهُونَ", "هُمْ وَأَزْوَاجُهُمْ فِي ظِلَالٍ عَلَى الْأَرَائِكِ مُتَّكِئُونَ", "لَهُمْ فِيهَا فَاكِهَةٌ وَلَهُمْ مَا يَدَّعُونَ", "سَلَامٌ قَوْلًا مِنْ رَبٍّ رَحِيمٍ", "وَامْتَازُوا الْيَوْمَ أَيُّهَا الْمُجْرِمُونَ", "أَلَمْ أَعْهَدْ إِلَيْكُمْ يَا بَنِي آدَمَ أَنْ لَا تَعْبُدُوا الشَّيْطَانَ ۖ إِنَّهُ لَكُمْ عَدُوٌّ مُبِينٌ", "وَأَنِ اعْبُدُونِي ۚ هَٰذَا صِرَاطٌ مُسْتَقِيمٌ", "وَلَقَدْ أَضَلَّ مِنْكُمْ جِبِلًّا كَثِيرًا ۖ أَفَلَمْ تَكُونُوا تَعْقِلُونَ", "هَٰذِهِ جَهَنَّمُ الَّتِي كُنْتُمْ تُوعَدُونَ", "اصْلَوْهَا الْيَوْمَ بِمَا كُنْتُمْ تَكْفُرُونَ", "الْيَوْمَ نَخْتِمُ عَلَىٰ أَفْوَاهِهِمْ وَتُكَلِّمُنَا أَيْدِيهِمْ وَتَشْهَدُ أَرْجُلُهُمْ بِمَا كَانُوا يَكْسِبُونَ", "وَلَوْ نَشَاءُ لَطَمَسْنَا عَلَىٰ أَعْيُنِهِمْ فَاسْتَبَقُوا الصِّرَاطَ فَأَنَّىٰ يُبْصِرُونَ", "وَلَوْ نَشَاءُ لَمَسَخْنَاهُمْ عَلَىٰ مَكَانَتِهِمْ فَمَا اسْتَطَاعُوا مُضِيًّا وَلَا يَرْجِعُونَ", "وَمَنْ نُعَمِّرْهُ نُنَكِّسْهُ فِي الْخَلْقِ ۖ أَفَلَا يَعْقِلُونَ", "وَمَا عَلَّمْنَاهُ الشِّعْرَ وَمَا يَنْبَغِي لَهُ ۚ إِنْ هُوَ إِلَّا ذِكْرٌ وَقُرْآنٌ مُبِينٌ", "لِيُنْذِرَ مَنْ كَانَ حَيًّا وَيَحِقَّ الْقَوْلُ عَلَى الْكَافِرِينَ", "أَوَلَمْ يَرَوْا أَنَّا خَلَقْنَا لَهُمْ مِمَّا عَمِلَتْ أَيْدِينَا أَنْعَامًا فَهُمْ لَهَا مَالِكُونَ", "وَذَلَّلْنَاهَا لَهُمْ فَمِنْهَا رَكُوبُهُمْ وَمِنْهَا يَأْكُلُونَ", "وَلَهُمْ فِيهَا مَنَافِعُ وَمَشَارِبُ ۖ أَفَلَا يَشْكُرُونَ", "وَاتَّخَذُوا مِنْ دُونِ اللَّهِ آلِهَةً لَعَلَّهُمْ يُنْصَرُونَ", "لَا يَسْتَطِيعُونَ نَصْرَهُمْ وَهُمْ لَهُمْ جُنْدٌ مُحْضَرُونَ", "فَلَا يَحْزُنْكَ قَوْلُهُمْ ۘ إِنَّا نَعْلَمُ مَا يُسِرُّونَ وَمَا يُعْلِنُونَ", "أَوَلَمْ يَرَ الْإِنْسَانُ أَنَّا خَلَقْنَاهُ مِنْ نُطْفَةٍ فَإِذَا هُوَ خَصِيمٌ مُبِينٌ", "وَضَرَبَ لَنَا مَثَلًا وَنَسِيَ خَلْقَهُ ۖ قَالَ مَنْ يُحْيِي الْعِظَامَ وَهِيَ رَمِيمٌ", "قُلْ يُحْيِيهَا الَّذِي أَنْشَأَهَا أَوَّلَ مَرَّةٍ ۖ وَهُوَ بِكُلِّ خَلْقٍ عَلِيمٌ", "الَّذِي جَعَلَ لَكُمْ مِنَ الشَّجَرِ الْأَخْضَرِ نَارًا فَإِذَا أَنْتُمْ مِنْهُ تُوقِدُونَ", "أَوَلَيْسَ الَّذِي خَلَقَ السَّمَاوَاتِ وَالْأَرْضَ بِقَادِرٍ عَلَىٰ أَنْ يَخْلُقَ مِثْلَهُمْ ۚ بَلَىٰ وَهُوَ الْخَلَّاقُ الْعَلِيمُ", "إِنَّمَا أَمْرُهُ إِذَا أَرَادَ شَيْئًا أَنْ يَقُولَ لَهُ كُنْ فَيَكُونُ", "فَسُبْحَانَ الَّذِي بِيَدِهِ مَلَكُوتُ كُلِّ شَيْءٍ وَإِلَيْهِ تُرْجَعُونَ"];
+ARN['Yâsîn']='سُورَةُ يس';
+function buildSub(){
+  sq.innerHTML='';
+  Object.keys(SUR).concat(['Fetih']).forEach(function(k){
+    var b=document.createElement('button');b.className='it';
+    if(SUR[k]){b.textContent=nm(k);b.onclick=function(){var v=SUR[k],f=k==='Fâtiha';showPg(nm(k),'<div class="mf"><div class="sn ar">'+ARN[k]+'</div><div class="bs ar">'+BIS+(f?' <span class="vn">'+ad(1)+'</span>':'')+'</div><div class="tx ar">'+(f?v.slice(1):v).map(function(a,i){return a+' <span class="vn">'+ad(i+(f?2:1))+'</span>'}).join(' ')+'</div></div>','mus')}}
+    else{b.textContent=k+' ('+L('soon')+')';b.className+=' off'}
+    sq.appendChild(b)})}
+var sl=document.getElementById('sl');
+LANGS.forEach(function(x){var b=document.createElement('button');b.className='it';b.textContent=x[1];b.onclick=function(){lang=x[0];try{localStorage.setItem('flip-lang',lang)}catch(e){}applyLang();sl.classList.remove('show')};sl.appendChild(b)});
+document.getElementById('hl').onclick=function(){sl.classList.toggle('show')};
+function applyLang(){
+  var g=function(i,t){document.getElementById(i).textContent=t};
+  g('hq',L('q')+' ▾');g('he',L('e'));g('hr',L('x'));g('hl',L('l')+' ▾');g('reset',L('r'));g('no',L('no'));g('ok',L('ok'));
+  document.querySelector('.lbl').textContent=L('t');
+  document.documentElement.lang=lang;
+  var d=(lang==='ar'||lang==='ur')?'rtl':'ltr';dr.dir=d;ov.dir=d;
+  buildSub()}
+document.getElementById('mb').onclick=function(){openDr(true)};
+sc.onclick=function(){openDr(false)};
+document.getElementById('hq').onclick=function(){sq.classList.toggle('show')};
+document.getElementById('he').onclick=function(){showPg('Esmaül Hüsna',ESMA.map(function(l,i){var a=l.split('|');return '<div class="nm"><b>'+(i+1)+'</b><div class="ar">'+a[0]+'</div><div><span class="t">'+a[1]+'</span><span class="m">'+(MEAN[lang]&&MEAN[lang][i]||a[2])+'</span></div></div>'}).join(''))};
+document.getElementById('pb').onclick=function(){pg.classList.remove('show')};
+applyLang();
+var LAND=window.matchMedia('(orientation:landscape) and (max-height:500px)');
+document.addEventListener('click',function(e){
+  if(!LAND.matches)return;
+  if(e.target.closest('button,.dr,.ov,.pg,.sc'))return;
+  nextBtn.onclick();
+});
+</script>
+</body>
+</html>
